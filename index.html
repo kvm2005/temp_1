@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>12:48Login Verification</title>
+    <title>Admit Card Verification</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -39,7 +39,7 @@
             display: block;
         }
 
-        input[type="text"], input[type="password"] {
+        input[type="text"] {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -91,15 +91,18 @@
 </head>
 <body>
     <div class="container">
-        <h3>Enter Your Credentials</h3>
-        <form id="loginForm" onsubmit="handleSubmit(event)">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required><br>
+        <h3>Admit Card Verification</h3>
+        <form id="verificationForm" onsubmit="handleSubmit(event)">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" placeholder="Enter your name">
 
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required><br>
+            <label for="fatherName">Father's Name:</label>
+            <input type="text" id="fatherName" name="fatherName" placeholder="Enter your father's name" required>
 
-            <button type="submit">Submit</button>
+            <label for="aadharNo">Aadhar Number:</label>
+            <input type="text" id="aadharNo" name="aadharNo" placeholder="Enter your Aadhar number">
+
+            <button type="submit">Verify</button>
         </form>
 
         <p id="response" class="error"></p>
@@ -108,9 +111,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script>
         // URL to your CSV file hosted on GitHub
-        const csvFileUrl = 'https://raw.githubusercontent.com/kvm2005/hello/refs/heads/main/credintials.csv';
+        const csvFileUrl = 'https://raw.githubusercontent.com/kvm2005/hello/refs/heads/main/credentials.csv';
 
-        let credentials = [];
+        let records = [];
 
         // Fetch and parse the CSV file
         fetch(csvFileUrl)
@@ -119,33 +122,44 @@
                 // Parse CSV using PapaParse
                 Papa.parse(data, {
                     complete: function(results) {
-                        credentials = results.data;
+                        records = results.data;
                     },
-                    header: true // Assumes the first row contains headers like 'username', 'password', 'file_link'
+                    header: true // Assumes the first row contains headers like 'name', 'father\'s_name', 'aadhar_no', 'reg_no'
                 });
             })
             .catch(error => {
                 console.error('Error fetching the CSV file:', error);
-                document.getElementById('response').textContent = 'Error loading credentials.';
+                document.getElementById('response').textContent = 'Error loading records.';
             });
 
         function handleSubmit(event) {
             event.preventDefault();
 
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+            const name = document.getElementById('name').value.trim();
+            const fatherName = document.getElementById('fatherName').value.trim();
+            const aadharNo = document.getElementById('aadharNo').value.trim();
 
-            // Check if the credentials exist in the parsed CSV data
-            const user = credentials.find(cred => cred.username === username && cred.password === password);
+            let matchedRecord = null;
 
-            if (user) {
-                // Show the file link in the response paragraph
-                document.getElementById('response').innerHTML = `Your file link: <a href="${user.file_link}" target="_blank">${user.file_link}</a>`;
-                document.getElementById('response').className = 'success';  // Success message styling
+            if (name && fatherName) {
+                // Check by name and father's name
+                matchedRecord = records.find(record => 
+                    record.name === name && record["father's_name"] === fatherName
+                );
+            } else if (aadharNo && fatherName) {
+                // Check by aadhar number and father's name
+                matchedRecord = records.find(record => 
+                    record.aadhar_no === aadharNo && record["father's_name"] === fatherName
+                );
+            }
+
+            if (matchedRecord) {
+                const admitCardUrl = `https://temp-admit-cards.akshargyanmanch.site/${matchedRecord.reg_no}.pdf`;
+                document.getElementById('response').innerHTML = `Your admit card: <a href="${admitCardUrl}" target="_blank">Download Here</a>`;
+                document.getElementById('response').className = 'success'; // Success message styling
             } else {
-                // Display error if credentials are invalid
-                document.getElementById('response').textContent = 'Invalid credentials!';
-                document.getElementById('response').className = 'error';  // Error message styling
+                document.getElementById('response').textContent = 'No record found! Please check your details.';
+                document.getElementById('response').className = 'error'; // Error message styling
             }
         }
     </script>
