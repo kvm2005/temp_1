@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1.1Admit Card Verification</title>
+    <title>1.2Admit Card Verification</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -100,7 +100,7 @@
             <input type="text" id="fatherName" name="fatherName" placeholder="Enter your father's name" required>
 
             <label for="aadharNo">Aadhar Number:</label>
-            <input type="number" id="aadharNo" name="aadharNo" placeholder="Enter your Aadhar number">
+            <input type="text" id="aadharNo" name="aadharNo" placeholder="Enter your Aadhar number">
 
             <button type="submit">Verify</button>
         </form>
@@ -124,7 +124,7 @@
                     complete: function(results) {
                         records = results.data;
                     },
-                    header: true // Assumes the first row contains headers like 'name', 'father\'s_name', 'aadhar_no', 'reg_no'
+                    header: true // Assumes the first row contains headers like 'Name', 'Father\'s name', 'Aadhar number', 'Reg.Number'
                 });
             })
             .catch(error => {
@@ -144,17 +144,17 @@
             if (name && fatherName) {
                 // Check by name and father's name
                 matchedRecord = records.find(record => 
-                    record.name === name && record["father's_name"] === fatherName
+                    record.Name === name && record["Father's name"] === fatherName
                 );
             } else if (aadharNo && fatherName) {
                 // Check by aadhar number and father's name
                 matchedRecord = records.find(record => 
-                    record.aadhar_no === aadharNo && record["father's_name"] === fatherName
+                    record["Aadhar number"] === aadharNo && record["Father's name"] === fatherName
                 );
             }
 
             if (matchedRecord) {
-                const admitCardUrl = `https://temp-admit-cards.akshargyanmanch.site/${matchedRecord.reg_no}.pdf`;
+                const admitCardUrl = `https://temp-admit-cards.akshargyanmanch.site/${matchedRecord["Reg.Number"]}.pdf`;
                 document.getElementById('response').innerHTML = `Your admit card: <a href="${admitCardUrl}" target="_blank">Download Here</a>`;
                 document.getElementById('response').className = 'success'; // Success message styling
             } else {
